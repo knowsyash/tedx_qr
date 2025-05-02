@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Check, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { ScanResult } from '../types';
 
@@ -19,6 +19,11 @@ const ScanHistory: React.FC<ScanHistoryProps> = ({ history, onClearHistory }) =>
   const formatTime = (date: Date) => {
     return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
+
+  const [valid, setvalid] = useState([]);
+  const [notvalid, setnotvalid] = useState([]);
+
+
   
   return (
     <div className="rounded-lg border border-gray-200 bg-white mb-6 overflow-hidden shadow-sm">
@@ -26,7 +31,9 @@ const ScanHistory: React.FC<ScanHistoryProps> = ({ history, onClearHistory }) =>
         className="flex items-center justify-between p-4 cursor-pointer"
         onClick={toggleExpand}
       >
-        <h3 className="text-lg font-medium">Recent Scans ({history.length})</h3>
+        <h3 className="text-lg font-medium">Verified Scans ({history.length})</h3>
+        {/* <h3 className="text-lg font-medium">valid ({valid.length})</h3>
+        <h3 className="text-lg font-medium">not valid ({notvalid.length})</h3> */}
         <button className="text-gray-500">
           {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </button>
@@ -64,14 +71,14 @@ const ScanHistory: React.FC<ScanHistoryProps> = ({ history, onClearHistory }) =>
             ))}
           </div>
           
-          <div className="p-3 border-t border-gray-200 text-center">
+          {/* <div className="p-3 border-t border-gray-200 text-center">
             <button 
               onClick={onClearHistory}
               className="text-sm text-[#e62b1e] hover:text-red-700"
             >
               Clear History
             </button>
-          </div>
+          </div> */}
         </>
       )}
     </div>

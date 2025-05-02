@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Check, X, User, Clock, Ticket } from 'lucide-react';
 import { ScanResult } from '../types';
 
 interface AttendeeValidationProps {
   scanResult: ScanResult | null;
-  onReset: () => void;
+  onReset: ()=>void;
 }
 
 const AttendeeValidation: React.FC<AttendeeValidationProps> = ({ scanResult, onReset }) => {
@@ -19,6 +19,14 @@ const AttendeeValidation: React.FC<AttendeeValidationProps> = ({ scanResult, onR
   const formatDate = (date: Date) => {
     return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
   };
+
+  useEffect(()=>{
+    setTimeout(()=>{
+      //@ts-ignore
+      onReset();
+
+    },3000)
+  },[])
   
   return (
     <div className={`rounded-lg border-2 p-5 mb-6 transform transition-all duration-500 ${

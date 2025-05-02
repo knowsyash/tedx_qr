@@ -40,14 +40,16 @@ function App() {
     setIsScanning(false);
     const result = validateAttendee(scannedId);
     setScanResult(result);
-    setScanHistory(prev => [result, ...prev]);
+    if(result.isValid === true){
+      setScanHistory(prev => [result, ...prev]);
+    }
   };
 
   const handleManualEntry = (attendeeId: string) => {
     handleScan(attendeeId);
   };
 
-  const resetScan = () => {
+  function resetScan(){
     setScanResult(null);
     setIsScanning(true);
   };
