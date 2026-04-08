@@ -8,9 +8,29 @@ import {
   initializeAttendees,
   loadAttendeesFromCsv,
   resetAllCheckIns,
+  restoreCheckInsFromHistory,
   validateAttendee,
 } from './utils/attendeeService.ts';
 import { ScanResult } from './types';
+
+const parseSavedHistory = (): ScanResult[] => {
+  const savedHistory = localStorage.getItem('scanHistory');
+  if (!savedHistory) {
+    return [];
+  }
+
+  try {
+    return JSON.parse(savedHistory, (key, value) => {
+      if (key === 'timestamp' || key === 'checkInTime') {
+        return value ? new Date(value) : null;
+      }
+      return value;
+    });
+  } catch (error) {
+    console.error('Error parsing scan history:', error);
+    return [];
+  }
+};
 
 function App() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
@@ -23,6 +43,9 @@ function App() {
     const bootstrapAttendees = async () => {
       try {
         setIsLoadingAttendees(true);
+        const parsedHistory = parseSavedHistory();
+        setScanHistory(parsedHistory);
+
         const candidateCsvPaths = ['/tedx26.csv', '/final.csv', '/allattendees.csv'];
         let loaded = false;
 
@@ -30,6 +53,7 @@ function App() {
           try {
             const attendees = await loadAttendeesFromCsv(csvPath);
             initializeAttendees(attendees);
+            restoreCheckInsFromHistory(parsedHistory);
             loaded = true;
             break;
           } catch {
@@ -51,25 +75,6 @@ function App() {
     };
 
     bootstrapAttendees();
-  }, []);
-
-  // Load history from localStorage on mount
-  useEffect(() => {
-    const savedHistory = localStorage.getItem('scanHistory');
-    if (savedHistory) {
-      try {
-        // Convert string dates back to Date objects
-        const parsedHistory = JSON.parse(savedHistory, (key, value) => {
-          if (key === 'timestamp' || key === 'checkInTime') {
-            return value ? new Date(value) : null;
-          }
-          return value;
-        });
-        setScanHistory(parsedHistory);
-      } catch (error) {
-        console.error('Error parsing scan history:', error);
-      }
-    }
   }, []);
 
   // Save history to localStorage when it changes

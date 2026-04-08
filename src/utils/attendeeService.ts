@@ -81,6 +81,29 @@ export const initializeAttendees = (attendees: Attendee[]) => {
     checkedInIds = new Set();
 };
 
+export const restoreCheckInsFromHistory = (history: ScanResult[]) => {
+    checkedInIds = new Set();
+
+    for (const scan of history) {
+        if (!scan?.isValid) {
+            continue;
+        }
+
+        const normalizedId = normalizeAttendeeId(scan.attendeeId);
+        const attendee = attendeeMap.get(normalizedId);
+        if (!attendee) {
+            continue;
+        }
+
+        checkedInIds.add(normalizedId);
+        attendeeMap.set(normalizedId, {
+            ...attendee,
+            isCheckedIn: true,
+            checkInTime: scan.timestamp ? new Date(scan.timestamp) : attendee.checkInTime,
+        });
+    }
+};
+
 export const validateAttendee = (scannedId: string): ScanResult => {
     const normalizedId = normalizeAttendeeId(scannedId);
 
