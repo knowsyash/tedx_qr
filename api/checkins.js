@@ -1,4 +1,4 @@
-import { getCheckinsCollection } from './_lib/mongo.js';
+const { getCheckinsCollection } = require('./_lib/mongo.js');
 
 function parseJsonBody(req) {
     if (!req.body) {
@@ -16,7 +16,7 @@ function parseJsonBody(req) {
     }
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     try {
         const collection = await getCheckinsCollection();
 
@@ -64,4 +64,4 @@ export default async function handler(req, res) {
         console.error('checkins API error:', error);
         return res.status(500).json({ message: 'Internal server error.' });
     }
-}
+};

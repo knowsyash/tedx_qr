@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+const { MongoClient } = require('mongodb');
 
 const uri = process.env.MONGODB_URI;
 
@@ -25,10 +25,12 @@ if (process.env.NODE_ENV === 'development') {
     clientPromise = client.connect();
 }
 
-export async function getCheckinsCollection() {
+async function getCheckinsCollection() {
     const connectedClient = await clientPromise;
     const db = connectedClient.db(process.env.MONGODB_DB || 'tedx_qr');
     const collection = db.collection('checkins');
     await collection.createIndex({ attendeeId: 1 }, { unique: true });
     return collection;
 }
+
+module.exports = { getCheckinsCollection };
