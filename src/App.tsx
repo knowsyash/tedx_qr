@@ -12,6 +12,11 @@ import {
   validateAttendee,
 } from './utils/attendeeService.ts';
 import { ScanResult } from './types';
+import {
+  clearAllDbCheckIns,
+  fetchCheckInsFromDb,
+  saveCheckInToDb,
+} from './utils/dbSyncService.ts';
 
 const parseSavedHistory = (): ScanResult[] => {
   if (typeof window === 'undefined') {
@@ -42,6 +47,15 @@ function App() {
   const [isScanning, setIsScanning] = useState<boolean>(true);
   const [isLoadingAttendees, setIsLoadingAttendees] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [dbActionMessage, setDbActionMessage] = useState<string | null>(null);
+  const [isDbActionRunning, setIsDbActionRunning] = useState<boolean>(false);
+
+  const showDbActionMessage = (message: string) => {
+    setDbActionMessage(message);
+    window.setTimeout(() => {
+      setDbActionMessage((current) => (current === message ? null : current));
+    }, 3500);
+  };
 
   useEffect(() => {
     const bootstrapAttendees = async () => {
@@ -54,7 +68,19 @@ function App() {
           try {
             const attendees = await loadAttendeesFromCsv(csvPath);
             initializeAttendees(attendees);
-            restoreCheckInsFromHistory(scanHistory);
+
+            let dbHistory: ScanResult[] = [];
+            let hasDbHistory = false;
+            try {
+              dbHistory = await fetchCheckInsFromDb();
+              hasDbHistory = true;
+            } catch (dbError) {
+              console.warn('MongoDB fetch unavailable, continuing with local history only.', dbError);
+            }
+
+            const initialHistory = hasDbHistory ? dbHistory : scanHistory;
+            setScanHistory(initialHistory);
+            restoreCheckInsFromHistory(initialHistory);
             loaded = true;
             break;
           } catch {
@@ -89,6 +115,9 @@ function App() {
     setScanResult(result);
     if (result.isValid === true) {
       setScanHistory(prev => [result, ...prev]);
+      saveCheckInToDb(result).catch((error) => {
+        console.warn('Failed to sync check-in to MongoDB:', error);
+      });
     }
   };
 
@@ -107,11 +136,56 @@ function App() {
     resetAllCheckIns();
   };
 
+  const handleFetchFromDb = async () => {
+    try {
+      setIsDbActionRunning(true);
+      const dbHistory = await fetchCheckInsFromDb();
+      setScanHistory(dbHistory);
+      restoreCheckInsFromHistory(dbHistory);
+      showDbActionMessage('Fetched latest check-ins from MongoDB.');
+    } catch (error) {
+      console.error('Failed to fetch from DB:', error);
+      showDbActionMessage('Failed to fetch from MongoDB. Check API and MONGODB_URI settings.');
+    } finally {
+      setIsDbActionRunning(false);
+    }
+  };
+
+  const handleClearMongoDb = async () => {
+    const confirmed = window.confirm('Clear all check-ins in MongoDB for all devices?');
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setIsDbActionRunning(true);
+      await clearAllDbCheckIns();
+      setScanHistory([]);
+      localStorage.removeItem('scanHistory');
+      resetAllCheckIns();
+      showDbActionMessage('MongoDB check-ins cleared successfully.');
+    } catch (error) {
+      console.error('Failed to clear MongoDB check-ins:', error);
+      showDbActionMessage('Failed to clear MongoDB check-ins.');
+    } finally {
+      setIsDbActionRunning(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Header />
+      <Header
+        onFetchFromDb={handleFetchFromDb}
+        onClearMongoDb={handleClearMongoDb}
+        isDbActionRunning={isDbActionRunning}
+      />
 
       <main className="flex-grow flex flex-col px-4 pb-8 max-w-md mx-auto w-full">
+        {dbActionMessage && (
+          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-center text-sm text-blue-700">
+            {dbActionMessage}
+          </div>
+        )}
         {isLoadingAttendees && (
           <div className="mb-4 rounded-lg border border-gray-200 bg-white p-3 text-center text-sm text-gray-600">
             Loading attendee list...
