@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Scan, X } from 'lucide-react';
-//@ts-ignore
-import Papa from 'papaparse';
 
 interface QRScannerProps {
   onScanSuccess: (decodedText: string) => void;
@@ -33,35 +31,9 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onScanFailure }) =
     };
   }, []);
 
-
-  const [validIds, setValidIds] = useState([]);
-
-  useEffect(() => {
-    fetch('/allattendees.csv')
-      .then(response => response.text())
-      .then(csvText => {
-        Papa.parse(csvText, {
-          header: false, // don't treat first row as header
-          skipEmptyLines: true,
-          //@ts-ignore
-          complete: function (results) {
-            const data = results.data;
-            // Skip header row, then extract only the first column (index 0)
-            //@ts-ignore
-            const ids = data.slice(1).map(row => row[0].trim());
-            setValidIds(ids);
-           
-          },
-          //@ts-ignore
-          error: function (error) {
-            console.error('Error parsing CSV:', error);
-          }
-        });
-      });
-  }, []);
   const startScanner = async () => {
     setError(null);
-    
+
     try {
       await cleanupScanner(); // Ensure previous instance is cleaned up
 
@@ -72,7 +44,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onScanFailure }) =
 
       const html5QrCode = new Html5Qrcode('qr-reader', /* verbose */ false);
       scannerRef.current = html5QrCode;
-      
+
       // Request camera permissions first
       const devices = await Html5Qrcode.getCameras();
       if (!devices || devices.length === 0) {
@@ -109,7 +81,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onScanFailure }) =
       console.error('QR Scanner Error:', err);
       setIsScanning(false);
       setError(
-        (err as Error).message || 
+        (err as Error).message ||
         'Failed to start camera. Please check permissions and try again.'
       );
     }
@@ -127,19 +99,19 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onScanFailure }) =
 
   return (
     <div className="mb-6">
-      <div 
+      <div
         className="relative mx-auto rounded-lg overflow-hidden bg-black bg-opacity-5 border-2 border-[#e62b1e] mb-4"
-        style={{ 
-          maxWidth: "100%", 
+        style={{
+          maxWidth: "100%",
           height: "350px"
         }}
       >
-        <div 
-          id="qr-reader" 
+        <div
+          id="qr-reader"
           ref={scannerContainerRef}
           className="w-full h-full"
         ></div>
-        
+
         {/* Overlay when scanner is not active */}
         {!isScanning && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70">
@@ -156,7 +128,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onScanFailure }) =
             </div>
           </div>
         )}
-        
+
         {/* Stop button when scanning */}
         {isScanning && (
           <button
@@ -167,13 +139,13 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onScanFailure }) =
           </button>
         )}
       </div>
-      
+
       {error && (
         <div className="text-[#e62b1e] text-sm text-center mb-4 p-2 bg-red-50 rounded">
           {error}
         </div>
       )}
-      
+
       <div className="text-center text-sm text-gray-500">
         Aim the camera at the attendee's QR code for scanning
       </div>
