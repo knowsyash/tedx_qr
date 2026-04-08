@@ -21,22 +21,22 @@ const Header: React.FC<HeaderProps> = ({ onFetchFromDb, onClearMongoDb, isDbActi
   };
 
   return (
-    <header className="bg-black px-4 py-4 mb-6 shadow-lg">
+    <header className="bg-gradient-to-r from-zinc-950 via-black to-zinc-900 px-4 py-4 mb-6 shadow-[0_12px_24px_rgba(0,0,0,0.2)]">
       <div className="mx-auto w-full max-w-5xl">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-white text-2xl font-bold flex items-center">
+            <h1 className="text-white text-2xl font-black tracking-tight flex items-center">
               <span className="text-[#e62b1e] mr-1">TEDx</span>
-              <span>JUET</span>
+              <span className="text-zinc-100">JUET</span>
             </h1>
-            <p className="text-gray-300 text-sm mt-1">Attendee Check-in System</p>
+            <p className="text-zinc-300 text-sm mt-1">Attendee Check-in System</p>
           </div>
 
           <div className="hidden md:flex items-center gap-3">
             <button
               onClick={handleFetch}
               disabled={isDbActionRunning}
-              className="inline-flex items-center gap-2 rounded-full border border-white/30 px-4 py-2 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-4 py-2 text-sm font-medium text-white hover:bg-white/15 disabled:opacity-60"
             >
               <RefreshCw size={16} />
               Fetch from DB
@@ -44,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({ onFetchFromDb, onClearMongoDb, isDbActi
             <button
               onClick={handleClear}
               disabled={isDbActionRunning}
-              className="inline-flex items-center gap-2 rounded-full bg-[#e62b1e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#cc2216] disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-full bg-[#e62b1e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#cc2216] disabled:opacity-60 shadow-[0_8px_16px_rgba(230,43,30,0.25)]"
             >
               <Trash2 size={16} />
               Clear MongoDB

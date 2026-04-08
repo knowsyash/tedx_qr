@@ -100,7 +100,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onScanFailure }) =
   return (
     <div className="mb-6">
       <div
-        className="relative mx-auto rounded-lg overflow-hidden bg-black bg-opacity-5 border-2 border-[#e62b1e] mb-4"
+        className="relative mx-auto rounded-2xl overflow-hidden bg-zinc-950/5 border-2 border-[#e62b1e] mb-4 shadow-[0_12px_24px_rgba(0,0,0,0.15)]"
         style={{
           maxWidth: "100%",
           height: "350px"
@@ -114,14 +114,14 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onScanFailure }) =
 
         {/* Overlay when scanner is not active */}
         {!isScanning && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-70">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-zinc-900/90 via-zinc-700/80 to-zinc-900/90">
             <div className="text-white text-center px-4">
               <Scan size={48} className="mx-auto mb-4 text-[#e62b1e]" />
-              <h3 className="text-xl font-semibold mb-2">QR Scanner</h3>
-              <p className="text-sm mb-4">Tap the button below to scan attendee QR codes</p>
+              <h3 className="text-2xl font-bold mb-2 tracking-tight">QR Scanner</h3>
+              <p className="text-sm mb-4 text-zinc-200">Tap the button below to scan attendee QR codes</p>
               <button
                 onClick={startScanner}
-                className="bg-[#e62b1e] text-white px-6 py-2 rounded-full font-medium hover:bg-opacity-90 transition-all"
+                className="bg-[#e62b1e] text-white px-6 py-2 rounded-full font-semibold hover:bg-opacity-90 transition-all shadow-[0_8px_18px_rgba(230,43,30,0.35)]"
               >
                 Start Scanning
               </button>
@@ -141,12 +141,12 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess, onScanFailure }) =
       </div>
 
       {error && (
-        <div className="text-[#e62b1e] text-sm text-center mb-4 p-2 bg-red-50 rounded">
+        <div className="text-[#e62b1e] text-sm text-center mb-4 p-2 bg-red-50/90 rounded-xl border border-red-100">
           {error}
         </div>
       )}
 
-      <div className="text-center text-sm text-gray-500">
+      <div className="text-center text-sm text-zinc-600 font-medium">
         Aim the camera at the attendee's QR code for scanning
       </div>
     </div>

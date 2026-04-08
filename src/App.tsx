@@ -173,26 +173,26 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#fdf2f2_0%,_#f4f4f5_45%,_#e4e4e7_100%)] flex flex-col">
       <Header
         onFetchFromDb={handleFetchFromDb}
         onClearMongoDb={handleClearMongoDb}
         isDbActionRunning={isDbActionRunning}
       />
 
-      <main className="flex-grow flex flex-col px-4 pb-8 max-w-md mx-auto w-full">
+      <main className="flex-grow flex flex-col px-4 pb-10 max-w-lg mx-auto w-full">
         {dbActionMessage && (
-          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-center text-sm text-blue-700">
+          <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50/90 p-3 text-center text-sm font-medium text-blue-700 shadow-sm">
             {dbActionMessage}
           </div>
         )}
         {isLoadingAttendees && (
-          <div className="mb-4 rounded-lg border border-gray-200 bg-white p-3 text-center text-sm text-gray-600">
+          <div className="mb-4 rounded-xl border border-zinc-200 bg-white/80 p-3 text-center text-sm text-zinc-700 shadow-sm">
             Loading attendee list...
           </div>
         )}
         {loadError && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm text-[#e62b1e]">
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50/90 p-3 text-center text-sm text-[#e62b1e] shadow-sm">
             {loadError}
           </div>
         )}
@@ -210,8 +210,8 @@ function App() {
         )}
       </main>
 
-      <footer className="bg-black text-white py-3 text-center text-sm">
-        <p>© 2025 TEDxJUET</p>
+      <footer className="mt-auto border-t border-zinc-300/70 bg-zinc-950 text-zinc-100 py-3 text-center text-sm">
+        <p>© 2026 TEDxJUET</p>
       </footer>
     </div>
   );
