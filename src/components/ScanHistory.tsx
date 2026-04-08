@@ -64,7 +64,7 @@ const ScanHistory: React.FC<ScanHistoryProps> = ({ history, onClearHistory }) =>
 
                 <div className="flex-grow">
                   <div className="font-medium">
-                    {scan.attendee ? scan.attendeeId : ""}
+                    {scan.attendeeId}
                   </div>
                   <div className="text-xs text-gray-500">
                     {scan.message}
