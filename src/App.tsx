@@ -14,6 +14,10 @@ import {
 import { ScanResult } from './types';
 
 const parseSavedHistory = (): ScanResult[] => {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
   const savedHistory = localStorage.getItem('scanHistory');
   if (!savedHistory) {
     return [];
@@ -34,7 +38,7 @@ const parseSavedHistory = (): ScanResult[] => {
 
 function App() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
-  const [scanHistory, setScanHistory] = useState<ScanResult[]>([]);
+  const [scanHistory, setScanHistory] = useState<ScanResult[]>(() => parseSavedHistory());
   const [isScanning, setIsScanning] = useState<boolean>(true);
   const [isLoadingAttendees, setIsLoadingAttendees] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -43,9 +47,6 @@ function App() {
     const bootstrapAttendees = async () => {
       try {
         setIsLoadingAttendees(true);
-        const parsedHistory = parseSavedHistory();
-        setScanHistory(parsedHistory);
-
         const candidateCsvPaths = ['/tedx26.csv', '/final.csv', '/allattendees.csv'];
         let loaded = false;
 
@@ -53,7 +54,7 @@ function App() {
           try {
             const attendees = await loadAttendeesFromCsv(csvPath);
             initializeAttendees(attendees);
-            restoreCheckInsFromHistory(parsedHistory);
+            restoreCheckInsFromHistory(scanHistory);
             loaded = true;
             break;
           } catch {
