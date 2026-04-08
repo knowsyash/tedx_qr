@@ -1,16 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import QRScanner from './components/QRScanner';
 import AttendeeValidation from './components/AttendeeValidation';
 import ManualEntry from './components/ManualEntry';
 import ScanHistory from './components/ScanHistory';
-import { validateAttendee } from './utils/attendeeService';
+import {
+  initializeAttendees,
+  loadAttendeesFromCsv,
+  resetAllCheckIns,
+  validateAttendee,
+} from './utils/attendeeService.ts';
 import { ScanResult } from './types';
 
 function App() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [scanHistory, setScanHistory] = useState<ScanResult[]>([]);
   const [isScanning, setIsScanning] = useState<boolean>(true);
+  const [isLoadingAttendees, setIsLoadingAttendees] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const bootstrapAttendees = async () => {
+      try {
+        setIsLoadingAttendees(true);
+        const candidateCsvPaths = ['/tedx26.csv', '/final.csv', '/allattendees.csv'];
+        let loaded = false;
+
+        for (const csvPath of candidateCsvPaths) {
+          try {
+            const attendees = await loadAttendeesFromCsv(csvPath);
+            initializeAttendees(attendees);
+            loaded = true;
+            break;
+          } catch {
+            // Try the next source.
+          }
+        }
+
+        if (!loaded) {
+          throw new Error('No valid attendee CSV source was found.');
+        }
+
+        setLoadError(null);
+      } catch (error) {
+        console.error('Failed to load attendees:', error);
+        setLoadError('Failed to load attendee data from CSV files. Please verify files in public/ and redeploy.');
+      } finally {
+        setIsLoadingAttendees(false);
+      }
+    };
+
+    bootstrapAttendees();
+  }, []);
 
   // Load history from localStorage on mount
   useEffect(() => {
@@ -40,7 +81,7 @@ function App() {
     setIsScanning(false);
     const result = validateAttendee(scannedId);
     setScanResult(result);
-    if(result.isValid === true){
+    if (result.isValid === true) {
       setScanHistory(prev => [result, ...prev]);
     }
   };
@@ -49,7 +90,7 @@ function App() {
     handleScan(attendeeId);
   };
 
-  function resetScan(){
+  function resetScan() {
     setScanResult(null);
     setIsScanning(true);
   };
@@ -57,13 +98,24 @@ function App() {
   const clearHistory = () => {
     setScanHistory([]);
     localStorage.removeItem('scanHistory');
+    resetAllCheckIns();
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header />
-      
+
       <main className="flex-grow flex flex-col px-4 pb-8 max-w-md mx-auto w-full">
+        {isLoadingAttendees && (
+          <div className="mb-4 rounded-lg border border-gray-200 bg-white p-3 text-center text-sm text-gray-600">
+            Loading attendee list...
+          </div>
+        )}
+        {loadError && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm text-[#e62b1e]">
+            {loadError}
+          </div>
+        )}
         {isScanning ? (
           <>
             <QRScanner onScanSuccess={handleScan} />
@@ -77,7 +129,7 @@ function App() {
           </div>
         )}
       </main>
-      
+
       <footer className="bg-black text-white py-3 text-center text-sm">
         <p>© 2025 TEDxJUET</p>
       </footer>
