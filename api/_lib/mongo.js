@@ -1,36 +1,33 @@
-const { MongoClient } = require('mongodb');
+import { MongoClient } from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
+const dbName = process.env.MONGODB_DB || 'tedx_qr';
 
-if (!uri) {
+let cached = globalThis.__mongoCache;
+
+if (!cached) {
+  cached = globalThis.__mongoCache = { client: null, clientPromise: null };
+}
+
+async function getMongoClient() {
+  if (!uri) {
     throw new Error('Missing MONGODB_URI environment variable.');
+  }
+
+  if (cached.clientPromise) {
+    return cached.clientPromise;
+  }
+
+  const client = new MongoClient(uri);
+  cached.client = client;
+  cached.clientPromise = client.connect();
+  return cached.clientPromise;
 }
 
-const options = {};
-
-let client;
-let clientPromise;
-
-if (process.env.NODE_ENV === 'development') {
-    global._mongoClientPromise = global._mongoClientPromise || null;
-
-    if (!global._mongoClientPromise) {
-        client = new MongoClient(uri, options);
-        global._mongoClientPromise = client.connect();
-    }
-
-    clientPromise = global._mongoClientPromise;
-} else {
-    client = new MongoClient(uri, options);
-    clientPromise = client.connect();
+export async function getCheckinsCollection() {
+  const connectedClient = await getMongoClient();
+  const db = connectedClient.db(dbName);
+  const collection = db.collection('checkins');
+  await collection.createIndex({ attendeeId: 1 }, { unique: true });
+  return collection;
 }
-
-async function getCheckinsCollection() {
-    const connectedClient = await clientPromise;
-    const db = connectedClient.db(process.env.MONGODB_DB || 'tedx_qr');
-    const collection = db.collection('checkins');
-    await collection.createIndex({ attendeeId: 1 }, { unique: true });
-    return collection;
-}
-
-module.exports = { getCheckinsCollection };
